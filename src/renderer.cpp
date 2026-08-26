@@ -36,7 +36,7 @@ void Renderer::render(const Mesh& mesh, const Material& material, const Camera& 
     current_commands_->set_pipeline(*material.pipeline());
 
     // Set vertex and index buffers
-    current_commands_->set_vertex_buffer(*mesh.vertex_buffer(), vertex_stride);
+    current_commands_->set_vertex_buffer(*mesh.vertex_buffer(), mesh.vertex_stride());
     current_commands_->set_index_buffer(*mesh.index_buffer());
 
     // Set texture if available

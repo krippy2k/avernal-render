@@ -68,6 +68,7 @@ target_sources(
     PRIVATE
         src/renderer.cpp
         src/mesh.cpp
+        src/avmesh.cpp
         src/material.cpp
         src/texture.cpp
         src/camera.cpp
@@ -78,6 +79,7 @@ target_sources(
             include/avernal/render/render.hpp
             include/avernal/render/renderer.hpp
             include/avernal/render/mesh.hpp
+            include/avernal/render/avmesh.hpp
             include/avernal/render/material.hpp
             include/avernal/render/texture.hpp
             include/avernal/render/camera.hpp
@@ -90,4 +92,15 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(avernal-render PRIVATE -Wall -Wextra -Wpedantic)
 elseif(MSVC)
     target_compile_options(avernal-render PRIVATE /W4)
+endif()
+
+if(PROJECT_IS_TOP_LEVEL)
+    option(AVERNAL_RENDER_BUILD_TESTS "Build Avernal Render unit tests" ON)
+else()
+    option(AVERNAL_RENDER_BUILD_TESTS "Build Avernal Render unit tests" OFF)
+endif()
+
+if(AVERNAL_RENDER_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
