@@ -31,7 +31,8 @@ struct Matrix4x4 {
     static Matrix4x4 look_at(float eye_x, float eye_y, float eye_z,
                              float center_x, float center_y, float center_z,
                              float up_x, float up_y, float up_z) {
-        // Forward vector (from eye to center)
+        // Left-handed: view +Z points from the eye toward the target so it matches
+        // perspective() (D3D-style clip Z in [0, 1], m[11] = 1).
         float fx = center_x - eye_x;
         float fy = center_y - eye_y;
         float fz = center_z - eye_z;
@@ -40,33 +41,33 @@ struct Matrix4x4 {
         fy /= f_len;
         fz /= f_len;
 
-        // Right vector
-        float rx = fy * up_z - fz * up_y;
-        float ry = fz * up_x - fx * up_z;
-        float rz = fx * up_y - fy * up_x;
+        // Right = up × forward
+        float rx = up_y * fz - up_z * fy;
+        float ry = up_z * fx - up_x * fz;
+        float rz = up_x * fy - up_y * fx;
         float r_len = std::sqrt(rx * rx + ry * ry + rz * rz);
         rx /= r_len;
         ry /= r_len;
         rz /= r_len;
 
-        // Up vector
-        float ux = ry * fz - rz * fy;
-        float uy = rz * fx - rx * fz;
-        float uz = rx * fy - ry * fx;
+        // Up = forward × right
+        float ux = fy * rz - fz * ry;
+        float uy = fz * rx - fx * rz;
+        float uz = fx * ry - fy * rx;
 
         Matrix4x4 result{};
         result.m[0] = rx;
         result.m[1] = ux;
-        result.m[2] = -fx;
+        result.m[2] = fx;
         result.m[4] = ry;
         result.m[5] = uy;
-        result.m[6] = -fy;
+        result.m[6] = fy;
         result.m[8] = rz;
         result.m[9] = uz;
-        result.m[10] = -fz;
+        result.m[10] = fz;
         result.m[12] = -(rx * eye_x + ry * eye_y + rz * eye_z);
         result.m[13] = -(ux * eye_x + uy * eye_y + uz * eye_z);
-        result.m[14] = fx * eye_x + fy * eye_y + fz * eye_z;
+        result.m[14] = -(fx * eye_x + fy * eye_y + fz * eye_z);
         result.m[15] = 1.0f;
         return result;
     }
