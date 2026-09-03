@@ -28,6 +28,9 @@ inline constexpr VertexAttribute default_vertex_attributes[] = {
 [[nodiscard]] MeshGeometry mesh_geometry_from_vertices(
     std::span<const Vertex> vertices, std::span<const std::uint16_t> indices);
 
+[[nodiscard]] MeshGeometry mesh_geometry_from_vertices(
+    std::span<const Vertex> vertices, std::span<const std::uint32_t> indices);
+
 [[nodiscard]] Bounds compute_vertex_bounds(std::span<const Vertex> vertices);
 
 class Mesh {

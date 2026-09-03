@@ -62,10 +62,12 @@ Bounds compute_vertex_bounds(std::span<const Vertex> vertices) {
     return bounds;
 }
 
-MeshGeometry mesh_geometry_from_vertices(
-    std::span<const Vertex> vertices, std::span<const std::uint16_t> indices) {
+namespace {
+
+[[nodiscard]] MeshGeometry geometry_from_vertices(
+    std::span<const Vertex> vertices, IndexFormat index_format, std::span<const std::byte> indices) {
     MeshGeometry geometry{};
-    geometry.index_format = IndexFormat::uint16;
+    geometry.index_format = index_format;
     geometry.streams.push_back(VertexStream{
         .stride = vertex_stride,
         .vertex_count = static_cast<std::uint32_t>(vertices.size()),
@@ -78,16 +80,43 @@ MeshGeometry mesh_geometry_from_vertices(
         std::memcpy(vertex_bytes.data(), vertices.data(), vertex_bytes.size());
     }
     geometry.stream_data.push_back(std::move(vertex_bytes));
-
-    geometry.index_data.resize(indices.size() * sizeof(std::uint16_t));
-    if (!indices.empty()) {
-        std::memcpy(geometry.index_data.data(), indices.data(), geometry.index_data.size());
-    }
-
+    geometry.index_data.assign(indices.begin(), indices.end());
     geometry.bounds = compute_vertex_bounds(vertices);
-    geometry.submeshes.push_back(
-        default_submesh(static_cast<std::uint32_t>(indices.size()), geometry.bounds));
+    const auto index_stride = index_format_size(index_format);
+    const auto index_count = index_stride == 0
+                                 ? 0u
+                                 : static_cast<std::uint32_t>(indices.size() / index_stride);
+    geometry.submeshes.push_back(default_submesh(index_count, geometry.bounds));
     return geometry;
+}
+
+}  // namespace
+
+MeshGeometry mesh_geometry_from_vertices(
+    std::span<const Vertex> vertices, std::span<const std::uint16_t> indices) {
+    return geometry_from_vertices(vertices, IndexFormat::uint16,
+        std::as_bytes(indices));
+}
+
+MeshGeometry mesh_geometry_from_vertices(
+    std::span<const Vertex> vertices, std::span<const std::uint32_t> indices) {
+    bool fits_uint16 = vertices.size() <= 65535u;
+    if (fits_uint16) {
+        for (const auto index : indices) {
+            if (index > 65535u) {
+                fits_uint16 = false;
+                break;
+            }
+        }
+    }
+    if (fits_uint16) {
+        std::vector<std::uint16_t> packed(indices.size());
+        for (std::size_t i = 0; i < indices.size(); ++i) {
+            packed[i] = static_cast<std::uint16_t>(indices[i]);
+        }
+        return mesh_geometry_from_vertices(vertices, packed);
+    }
+    return geometry_from_vertices(vertices, IndexFormat::uint32, std::as_bytes(indices));
 }
 
 Buffer* Mesh::vertex_buffer(std::size_t stream) const noexcept {

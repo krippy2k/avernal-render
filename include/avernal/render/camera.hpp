@@ -17,6 +17,19 @@ struct Matrix4x4 {
         };
     }
 
+    static Matrix4x4 ortho(
+        float left, float right, float bottom, float top, float near_plane, float far_plane) {
+        Matrix4x4 result{};
+        result.m[0] = 2.0f / (right - left);
+        result.m[5] = 2.0f / (top - bottom);
+        result.m[10] = 1.0f / (far_plane - near_plane);
+        result.m[12] = -(right + left) / (right - left);
+        result.m[13] = -(top + bottom) / (top - bottom);
+        result.m[14] = -near_plane / (far_plane - near_plane);
+        result.m[15] = 1.0f;
+        return result;
+    }
+
     static Matrix4x4 perspective(float fov_y, float aspect, float near_plane, float far_plane) {
         const float tan_half_fov = std::tan(fov_y / 2.0f);
         Matrix4x4 result{};

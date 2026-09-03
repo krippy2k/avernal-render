@@ -25,8 +25,16 @@ public:
     /// Set the texture for this material
     void set_texture(Texture* texture) { texture_ = texture; }
 
+    void set_pbr(float metallic, float roughness) {
+        metallic_ = metallic;
+        roughness_ = roughness;
+    }
+
     /// Get the texture
     [[nodiscard]] Texture* texture() const noexcept { return texture_; }
+
+    [[nodiscard]] float metallic() const noexcept { return metallic_; }
+    [[nodiscard]] float roughness() const noexcept { return roughness_; }
 
     /// Get the pipeline
     [[nodiscard]] Pipeline* pipeline() const noexcept { return pipeline_.get(); }
@@ -34,6 +42,8 @@ public:
 private:
     std::unique_ptr<Pipeline> pipeline_;
     Texture* texture_{};
+    float metallic_{0.0f};
+    float roughness_{1.0f};
 };
 
 }  // namespace avernal::render

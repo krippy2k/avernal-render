@@ -72,6 +72,7 @@ target_sources(
         src/material.cpp
         src/texture.cpp
         src/camera.cpp
+        src/shadow_map.cpp
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS include
@@ -83,6 +84,8 @@ target_sources(
             include/avernal/render/material.hpp
             include/avernal/render/texture.hpp
             include/avernal/render/camera.hpp
+            include/avernal/render/light.hpp
+            include/avernal/render/shadow_map.hpp
 )
 
 target_link_libraries(avernal-render PUBLIC avernal::core avernal::rhi)
